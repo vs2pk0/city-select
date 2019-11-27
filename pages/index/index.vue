@@ -1,94 +1,3 @@
-#城市选择插件说明
-
----
-
-## 目录结构
-
-> -   components ---组件目录
-> -   pages --- 页面目录（DEMO）
-
-## 使用方式
-
-```python
- import citySelect from "@/components/city-select/city-select.vue"
-  export default {
-    components: {citySelect}
-  }
-```
-
-## 功能介绍
-> -   formatName --- 需要构建索引参数的名称（注意：传递的对象里面必须要有这个名称的参数）
-> -   activeCity --- 当前城市
-> -   hotCity --- 热门城市
-> -   obtainCitys --- 需要排序的城市数据
-> -   isSearch --- 是否有搜索功能
-> -   cityClick --- 点击城市回调方法
-
-```python
-   formatName: 'title',
-   //当前城市
-   activeCity: {
-   	id: 1,
-   	title: '南京市'
-   },
-   //热门城市
-   hotCity: [
-   	{
-   		id: 0,
-   		title: '南京市'
-   	},
-   	{
-   		id: 1,
-   		title: '南京市'
-   	}
-   ],
-   //显示的城市数据
-   obtainCitys: [
-   	{
-   		id: 0,
-   		title: '南京'
-   	},
-   	{
-   		id: 1,
-   		title: '北京'
-   	},
-   	{
-   		id: 2,
-   		title: '天津'
-   	},
-   	{
-   		id: 3,
-   		title: '东京'
-   	}
-   ]
-```
-
-## 示例数据
-
-```python
-[
-	{
-		id: 0,
-		title: '南京'
-	},
-	{
-		id: 1,
-		title: '北京'
-	},
-	{
-		id: 2,
-		title: '天津'
-	},
-	{
-		id: 3,
-		title: '东京'
-	}
-]
-```
-
-## 完整 Demo
-
-```python
 <template>
 	<view>
 		<city-select
@@ -155,7 +64,7 @@ export default {
 	onLoad() {
 		//动态更新数据
 		setTimeout(() => {
-			//修改需要构建索引参数的名称
+			//修改数据格式
 			this.formatName = 'cityName'
 			//修改当前城市
 			this.activeCity = {
@@ -201,22 +110,3 @@ export default {
 </script>
 
 <style></style>
-
-
-
-```
-
-## 运行方式
-
-###将文件解压拖入 HBuilderX ,引入 App.vue、main.js、manifest.json、pages.json 文件，配置好页面路径，运行即可
-
-```python
-"pages": [
-		 {
-            "path" : "pages/index/index",
-            "style" : {
-				"navigationBarTitleText": "index"
-			}
-        }
-	],
-```
