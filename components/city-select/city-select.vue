@@ -3,7 +3,7 @@
 	<view class="city-select">
 		<scroll-view :scroll-top="scrollTop" scroll-y="true" class="city-select-main" id="city-select-main" :scroll-into-view="toView">
 			<!-- 预留搜索-->
-			<view class="city-serach" v-if="isSearch"><input @input="keyInput" placeholder="请输入城市名称" class="city-serach-input" /></view>
+			<view class="city-serach" v-if="isSearch"><input @input="keyInput" :placeholder="placeholder" class="city-serach-input" /></view>
 			<!-- 当前定位城市 -->
 			<view class="hot-title" v-if="activeCity && !serachCity">当前定位城市</view>
 			<view class="hot-city" v-if="activeCity && !serachCity">
@@ -18,14 +18,14 @@
 			</view>
 			<!-- 城市列表(搜索前) -->
 			<view class="citys" v-if="!serachCity">
-				<view v-for="(city, index) in sortItems" :key="index" v-show="city.isCity">
+				<view v-for="(city, index) in sortItems" :key="index" v-show="city.isCity" class="citys-row">
 					<view class="citys-item-letter" :id="'city-letter-' + (city.name === '#' ? '0' : city.name)">{{ city.name }}</view>
 					<view class="citys-item" v-for="(item, inx) in city.citys" :key="inx" @click="cityTrigger(item)">{{ item.cityName }}</view>
 				</view>
 			</view>
 			<!-- 城市列表(搜索后)  -->
 			<view class="citys" v-if="serachCity">
-				<view v-for="(item, index) in searchDatas" :key="index">
+				<view v-for="(item, index) in searchDatas" :key="index" class="citys-row">
 					<view class="citys-item" :key="inx" @click="cityTrigger(item)">{{ item.name }}</view>
 				</view>
 			</view>
@@ -33,7 +33,9 @@
 		<!-- 城市选择索引-->
 		<view class="city-indexs-view" v-if="!serachCity">
 			<view class="city-indexs">
-				<view v-for="(cityIns, index) in handleCity" v-show="cityIns.isCity" :key="index" @click="cityindex(cityIns.forName)">{{ cityIns.name }}</view>
+				<view v-for="(cityIns, index) in handleCity" class="city-indexs-text" v-show="cityIns.isCity" :key="index" @click="cityindex(cityIns.forName)">
+					{{ cityIns.name }}
+				</view>
 			</view>
 		</view>
 	</view>
@@ -43,6 +45,11 @@
 import citySelect from './citySelect.js';
 export default {
 	props: {
+		//查询提示文字
+		placeholder: {
+			type: String,
+			default: '请输入城市名称'
+		},
 		//传入要排序的名称
 		formatName: {
 			type: String,
@@ -324,7 +331,7 @@ view {
 	}
 
 	.citys {
-		> view {
+		.citys-row {
 			padding-left: vww(18);
 			width: 100%;
 			font-size: 14px;
@@ -370,7 +377,7 @@ view {
 			vertical-align: middle;
 			align-self: center;
 
-			> view {
+			.city-indexs-text {
 				margin-bottom: vww(10);
 				width: vww(20);
 				font-size: 12px;

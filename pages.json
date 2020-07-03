@@ -5,6 +5,16 @@
 			"style": {
 				"navigationBarTitleText": "uni-app"
 			}
+		}, {
+			"path": "pages/address-list/address-list",
+			"style": {
+				"navigationBarTitleText": "联系人"
+			}
+		}, {
+			"path": "pages/citys/citys",
+			"style": {
+				"navigationBarTitleText": "选择城市"
+			}
 		}
 	],
 	"globalStyle": {
