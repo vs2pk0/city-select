@@ -1,7 +1,7 @@
 <template>
 	<!-- 城市选择-->
 	<view class="city-select">
-		<scroll-view :scroll-top="scrollTop" scroll-y="true" class="city-select-main" id="city-select-main">
+		<scroll-view :scroll-top="scrollTop" scroll-y="true" class="city-select-main" id="city-select-main" :scroll-into-view="toView">
 			<!-- 预留搜索-->
 			<view class="city-serach" v-if="isSearch"><input @input="keyInput" placeholder="请输入城市名称" class="city-serach-input" /></view>
 			<!-- 当前定位城市 -->
@@ -33,14 +33,14 @@
 		<!-- 城市选择索引-->
 		<view class="city-indexs-view" v-if="!serachCity">
 			<view class="city-indexs">
-				<view v-for="(cityIns, index) in handleCity" v-show="cityIns.isCity" :key="index" @click="cityindex(cityIns.name)">{{ cityIns.name }}</view>
+				<view v-for="(cityIns, index) in handleCity" v-show="cityIns.isCity" :key="index" @click="cityindex(cityIns.forName)">{{ cityIns.name }}</view>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-import citySelect from './citySelect.js'
+import citySelect from './citySelect.js';
 export default {
 	props: {
 		//传入要排序的名称
@@ -71,13 +71,14 @@ export default {
 	},
 	data() {
 		return {
+			toView: 'city-letter-Find', //锚链接 初始值
 			scrollTop: 0, //scroll-view 滑动的距离
 			cityindexs: [], // 城市索引
 			activeCityIndex: '', // 当前所在的城市索引
 			handleCity: [], // 处理后的城市数据
 			serachCity: '', // 搜索的城市
 			cityData: []
-		}
+		};
 	},
 	computed: {
 		/**
@@ -87,42 +88,42 @@ export default {
 		sortItems() {
 			for (let index = 0; index < this.handleCity.length; index++) {
 				if (this.handleCity[index].isCity) {
-					var cityArr = this.handleCity[index].citys
+					let cityArr = this.handleCity[index].citys;
 					cityArr = cityArr.sort(function(a, b) {
-						var value1 = a.unicode
-						var value2 = b.unicode
-						return value1 - value2
-					})
+						var value1 = a.unicode;
+						var value2 = b.unicode;
+						return value1 - value2;
+					});
 				}
 			}
-			return this.handleCity
+			return this.handleCity;
 		},
 		/**
 		 * @desc 搜索后的城市列表
 		 * @return Array
 		 */
 		searchDatas() {
-			var searchData = []
+			var searchData = [];
 			for (let i = 0; i < this.cityData.length; i++) {
 				if (this.cityData[i][this.formatName].indexOf(this.serachCity) !== -1) {
 					searchData.push({
 						oldData: this.cityData[i],
 						name: this.cityData[i][this.formatName]
-					})
+					});
 				}
 			}
-			return searchData
+			return searchData;
 		}
 	},
 	created() {
 		// 初始化城市数据
-		this.cityData = this.obtainCitys
-		this.initializationCity()
-		this.buildCityindexs()
+		this.cityData = this.obtainCitys;
+		this.initializationCity();
+		this.buildCityindexs();
 	},
 	watch: {
 		obtainCitys(newData) {
-			this.updateCitys(newData)
+			this.updateCitys(newData);
 		}
 	},
 	methods: {
@@ -131,31 +132,31 @@ export default {
 		 */
 		updateCitys(data) {
 			if (data && data.length) {
-				this.cityData = data
-				this.initializationCity()
-				this.buildCityindexs()
+				this.cityData = data;
+				this.initializationCity();
+				this.buildCityindexs();
 			}
 		},
 		/**
 		 * @desc 监听输入框的值
 		 */
 		keyInput(event) {
-			this.serachCity = event.detail.value
-			console.log(this.serachCity)
+			this.serachCity = event.detail.value;
 		},
 		/**
 		 * @desc 初始化城市数据
 		 * @return undefind
 		 */
 		initializationCity() {
-			this.handleCity = []
-			const cityLetterArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#']
+			this.handleCity = [];
+			const cityLetterArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'];
 			for (let index = 0; index < cityLetterArr.length; index++) {
 				this.handleCity.push({
 					name: cityLetterArr[index],
 					isCity: false, // 用于区分是否含有当前字母开头的城市
-					citys: [] // 存放城市首字母含是此字母的数组
-				})
+					citys: [], // 存放城市首字母含是此字母的数组
+					forName: 'city-letter-' + (cityLetterArr[index] == '#' ? '0' : cityLetterArr[index]) //label的绑定
+				});
 			}
 		},
 		/**
@@ -163,31 +164,31 @@ export default {
 		 * @param str String
 		 */
 		getLetter(str) {
-			return citySelect.getFirstLetter(str[0])
+			return citySelect.getFirstLetter(str[0]);
 		},
 		/**
 		 * @desc 构建城市索引
 		 * @return undefind
 		 */
 		buildCityindexs() {
-			this.cityindexs = []
+			this.cityindexs = [];
 			for (let i = 0; i < this.cityData.length; i++) {
 				// 获取首字母
-				let cityLetter = this.getLetter(this.cityData[i][this.formatName]).firstletter
+				const cityLetter = this.getLetter(this.cityData[i][this.formatName]).firstletter;
 				// 获取当前城市首字母的unicode，用作后续排序
-				let unicode = this.getLetter(this.cityData[i][this.formatName]).unicode
+				const unicode = this.getLetter(this.cityData[i][this.formatName]).unicode;
 
-				let index = this.cityIndexPosition(cityLetter)
+				const index = this.cityIndexPosition(cityLetter);
 				if (this.cityindexs.indexOf(cityLetter) === -1) {
-					this.handleCity[index].isCity = true
-					this.cityindexs.push(cityLetter)
+					this.handleCity[index].isCity = true;
+					this.cityindexs.push(cityLetter);
 				}
 
 				this.handleCity[index].citys.push({
 					cityName: this.cityData[i][this.formatName],
 					unicode: unicode,
 					oldData: this.cityData[i]
-				})
+				});
 			}
 		},
 		/**
@@ -195,21 +196,22 @@ export default {
 		 * @param id String 城市索引
 		 */
 		cityindex(id) {
-			//创建节点查询器
-			const query = uni.createSelectorQuery().in(this)
-			var that = this
-			that.scrollTop = 0
-			//滑动到指定位置(解决方法:重置到顶部，重新计算，影响:页面会闪一下)
-			setTimeout(() => {
-				query
-					.select('#city-letter-' + (id === '#' ? '0' : id))
-					.boundingClientRect(data => {
-						// console.log("得到布局位置信息" + JSON.stringify(data));
-						// console.log("节点离页面顶部的距离为" + data.top);
-						data ? (that.scrollTop = data.top) : void 0
-					})
-					.exec()
-			}, 0)
+			this.toView = id;
+			// //创建节点查询器
+			// const query = uni.createSelectorQuery().in(this)
+			// var that = this
+			// that.scrollTop = 0
+			// //滑动到指定位置(解决方法:重置到顶部，重新计算，影响:页面会闪一下)
+			// setTimeout(() => {
+			// 	query
+			// 		.select('#city-letter-' + (id === '#' ? '0' : id))
+			// 		.boundingClientRect(data => {
+			// 			// console.log("得到布局位置信息" + JSON.stringify(data));
+			// 			// console.log("节点离页面顶部的距离为" + data.top);
+			// 			data ? (that.scrollTop = data.top) : void 0
+			// 		})
+			// 		.exec()
+			// }, 0)
 		},
 		/**
 		 * @desc 获取城市首字母的unicode
@@ -217,20 +219,20 @@ export default {
 		 */
 		cityIndexPosition(letter) {
 			if (!letter) {
-				return ''
+				return '';
 			}
-			const ACode = 65
-			return letter === '#' ? 26 : letter.charCodeAt(0) - ACode
+			const ACode = 65;
+			return letter === '#' ? 26 : letter.charCodeAt(0) - ACode;
 		},
 		/** @desc 城市列表点击事件
 		 *  @param Object
 		 */
-		cityTrigger(item, isHot) {
+		cityTrigger(item) {
 			// 传值到父组件
-			this.$emit('cityClick', item.oldData ? item.oldData : item)
+			this.$emit('cityClick', item.oldData ? item.oldData : item);
 		}
 	}
-}
+};
 </script>
 
 <style lang="scss">
