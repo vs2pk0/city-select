@@ -1,7 +1,7 @@
 <template>
 	<!-- 城市选择-->
 	<view class="city-select">
-		<scroll-view :scroll-top="scrollTop" scroll-y="true" class="city-select-main" id="city-select-main" :scroll-into-view="toView">
+		<scroll-view scroll-y="true" class="city-select-main" id="city-select-main" :scroll-into-view="toView">
 			<!-- 预留搜索-->
 			<view class="city-serach" v-if="isSearch"><input @input="keyInput" :placeholder="placeholder" class="city-serach-input" /></view>
 			<!-- 当前定位城市 -->
@@ -32,16 +32,29 @@
 		</scroll-view>
 		<!-- 城市选择索引-->
 		<view class="city-indexs-view" v-if="!serachCity">
+			<!-- #ifndef MP-WEIXIN -->
+			<view class="city-indexs" id="index-bar">
+				<view v-for="(cityIns, index) in handleCity" class="city-indexs-text" v-show="cityIns.isCity" :key="index" @click="cityindex(cityIns.forName)">
+					{{ cityIns.name }}
+				</view>
+			</view>
+			<!-- #endif -->
+			<!-- #ifdef MP-WEIXIN -->
 			<view class="city-indexs" @touchstart="tStart" @touchend="tEnd" @touchmove.stop="tMove" id="index-bar">
 				<view v-for="(cityIns, index) in handleCity" class="city-indexs-text" v-show="cityIns.isCity" :key="index" @click="cityindex(cityIns.forName)">
 					{{ cityIns.name }}
 				</view>
 			</view>
+			<!-- #endif -->
+
 		</view>
 		<!--选择显示-->
-		<view v-show="!hidden" class="indexToast">
-			{{listCur}}
+
+		<!-- #ifdef MP-WEIXIN -->
+		<view v-show="!hidden" class="index-toast">
+			{{listCurID}}
 		</view>
+		<!-- #endif -->
 	</view>
 </template>
 
@@ -82,12 +95,10 @@
 		},
 		data() {
 			return {
-				itemHeight: 0,
-				screenHeight: 0,
-				hidden: true,
-				listCur: '',
+				itemHeight: 0, //索引item高度
+				hidden: true, //滑动显示
+				listCurID: '', //滑动显示的字母
 				toView: 'city-letter-Find', //锚链接 初始值
-				scrollTop: 0, //scroll-view 滑动的距离
 				cityindexs: [], // 城市索引
 				activeCityIndex: '', // 当前所在的城市索引
 				handleCity: [], // 处理后的城市数据
@@ -141,40 +152,26 @@
 				this.updateCitys(newData);
 			}
 		},
-		onReady() {
-
-		},
+		// #ifdef MP-WEIXIN
 		mounted() {
-
-			//获取本机数据
-			// uni.getSystemInfo({
-			// 	success: res => {
-			// 		console.log(res);
-			// 		this.screenHeight = res.screenHeight;
-			// 	},
-			// 	fail(err) {
-			// 		console.log(err);
-			// 	}
-			// });
-			// setTimeout(() => {
-			let that = this;
-			// uni.createSelectorQuery().select('.city-indexs').boundingClientRect(function(res) {
-			// 	// that.barTop = res.top
-			// 	console.log("res", res)
-			// }).exec()
-
-			const query = uni.createSelectorQuery().in(this);
-			query.select('#index-bar').boundingClientRect(data => {
-				console.log("得到布局位置信息", JSON.stringify(data));
-				console.log("节点离页面顶部的距离为", data.top);
-				that.barTop = data.top
-				const cityIndexName = this.handleCity.filter(item => item.isCity);
-				this.itemHeight = data.height / cityIndexName.length;
-				console.log("this.itemHeight", this.itemHeight)
-			}).exec();
-			// }, 5000);
+			this.getIndexsHeight();
 		},
+		// #endif
 		methods: {
+			// #ifdef MP-WEIXIN
+			//获取索引高度
+			getIndexsHeight() {
+				//获取索引高度
+				let that = this;
+				const query = uni.createSelectorQuery().in(this);
+				query.select('#index-bar').boundingClientRect(data => {
+					// console.log("得到布局位置信息", JSON.stringify(data));
+					// console.log("节点离页面顶部的距离为", data.top);
+					that.barTop = data.top
+					const cityIndexName = this.handleCity.filter(item => item.isCity);
+					this.itemHeight = data.height / cityIndexName.length;
+				}).exec();
+			},
 			//滑动选择Item
 			tMove(e) {
 				this.hidden = false
@@ -186,13 +183,13 @@
 				//判断选择区域,只有在选择区才会生效
 				if (y > offsettop) {
 					let num = parseInt((y - offsettop) / this.itemHeight);
-					console.log(num, cityIndexName.length)
+					// console.log(num, cityIndexName.length)
 					if (num > cityIndexName.length) {
 						this.hidden = true
 						this.listCurID = '';
 					} else {
 						this.hidden = false
-						this.listCur = cityIndexName[num].name
+						this.listCurID = cityIndexName[num].name
 					}
 				} else {
 					this.listCurID = '';
@@ -211,11 +208,10 @@
 			//触发结束选择
 			tEnd() {
 				this.hidden = true;
-				this.listCurID = this.listCur
 				this.toView = 'city-letter-' + (this.listCurID == "#" ? "0" : this.listCurID);
 				this.listCurID = '';
-				console.log(222222222222222, this.toView)
 			},
+			// #endif
 			/**
 			 * @desc 初始化
 			 */
@@ -224,6 +220,11 @@
 					this.cityData = data;
 					this.initializationCity();
 					this.buildCityindexs();
+					// #ifdef MP-WEIXIN
+					setTimeout(() => {
+						this.getIndexsHeight();
+					}, 500);
+					// #endif
 				}
 			},
 			/**
@@ -288,21 +289,6 @@
 			 */
 			cityindex(id) {
 				this.toView = id;
-				// //创建节点查询器
-				// const query = uni.createSelectorQuery().in(this)
-				// var that = this
-				// that.scrollTop = 0
-				// //滑动到指定位置(解决方法:重置到顶部，重新计算，影响:页面会闪一下)
-				// setTimeout(() => {
-				// 	query
-				// 		.select('#city-letter-' + (id === '#' ? '0' : id))
-				// 		.boundingClientRect(data => {
-				// 			// console.log("得到布局位置信息" + JSON.stringify(data));
-				// 			// console.log("节点离页面顶部的距离为" + data.top);
-				// 			data ? (that.scrollTop = data.top) : void 0
-				// 		})
-				// 		.exec()
-				// }, 0)
 			},
 			/**
 			 * @desc 获取城市首字母的unicode
@@ -332,21 +318,24 @@
 		@return ($number / 375) * 750+rpx;
 	}
 
-	.indexToast {
+	/* #ifndef MP-ALIPAY */
+	.index-toast {
 		position: fixed;
 		top: 0;
-		right: 80upx;
+		right: vww(40);
 		bottom: 0;
 		background: rgba(0, 0, 0, 0.5);
-		width: 100upx;
-		height: 100upx;
-		border-radius: 10upx;
+		width: vww(50);
+		height: vww(50);
+		border-radius: 10px;
 		margin: auto;
 		color: #fff;
-		line-height: 100upx;
+		line-height: vww(50);
 		text-align: center;
-		font-size: 48upx;
+		font-size: vww(16);
 	}
+
+	/* #endif */
 
 	view {
 		box-sizing: border-box;

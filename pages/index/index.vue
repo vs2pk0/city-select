@@ -6,19 +6,19 @@
 </template>
 
 <script>
-export default {
-	data() {
-		return {};
-	},
-	methods: {
-		goPage(str) {
-			console.log(`/pages/${str}/${str}`)
-			uni.navigateTo({
-				url: `/pages/${str}/${str}`
-			});
+	export default {
+		data() {
+			return {};
+		},
+		methods: {
+			goPage(str) {
+				console.log(`/pages/${str}/${str}`)
+				uni.navigateTo({
+					url: `/pages/${str}/${str}`
+				});
+			}
 		}
-	}
-};
+	};
 </script>
 
 <style lang="scss"></style>
