@@ -380,6 +380,8 @@
 			font-size: 14px;
 			line-height: vww(40);
 			color: #9b9b9b;
+    			flex-direction: row;
+   			flex-wrap: wrap;
 		}
 
 		.hot-city {
